@@ -4,14 +4,6 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\UserGroup;
-use App\Department;
-use App\Designation;
-use App\Branch;
-use App\Bank;
-use App\Retailer;
-use App\WhToLocalWhManager;
-use App\WarehouseToSr;
-use App\TmToWarehouse;
 use Session;
 use Redirect;
 use Auth;
@@ -41,26 +33,20 @@ class UserController extends Controller {
         //passing param for custom function
         $qpArr = $request->all();
 
-        $userGroupArr = UserGroup::whereNotIn('id',[9,18,19])->pluck('name', 'id')->toArray();
+        $userGroupArr = UserGroup::pluck('name', 'id')->toArray();
         $groupList = array('0' => __('label.SELECT_USER_GROUP_OPT')) + $userGroupArr;
 
-        $departmentList = array('0' => __('label.SELECT_DEPARTMENT_OPT')) + Department::orderBy('order', 'asc')->pluck('short_name', 'id')->toArray();
-
+        
         $targetArr = User::join('user_group', 'user_group.id', '=', 'users.group_id')
-                ->join('department', 'department.id', '=', 'users.department_id')
-                ->join('designation', 'designation.id', '=', 'users.designation_id')
-                ->whereNotIn('user_group.id',[9,18,19])
-                ->select('user_group.name as group_name', 'users.group_id', 'users.id', 'users.first_name'
-                        , 'users.last_name', 'users.username', 'users.photo', 'users.status', 'designation.title as designation_name'
-                        , 'department.name as department_name', 'users.employee_id', 'users.email'
+                ->select('user_group.name as group_name', 'users.group_id', 'users.id'
+                        , 'users.name', 'users.username', 'users.photo', 'users.status'
+                        , 'users.email'
                         , 'users.phone')
                 ->orderBy('users.group_id', 'asc');
 
         //begin filtering
         $searchText = $request->search;
         $nameArr = User::select('username')->orderBy('group_id', 'asc')->get();
-        $userDepartmentOption = array('0' => __('label.SELECT_DEPARTMENT_OPT')) + Department::orderBy('order', 'asc')->pluck('name', 'id')->toArray();
-        $designationList = array('0' => __('label.SELECT_DESIGNATION_OPT')) + Designation::orderBy('order', 'asc')->pluck('title', 'id')->toArray();
         $status = array('0' => __('label.SELECT_STATUS_OPT')) + ['1' => __('label.ACTIVE'), '2' => __('label.INACTIVE')];
 
         if (!empty($searchText)) {
@@ -72,12 +58,6 @@ class UserController extends Controller {
         if (!empty($request->user_group)) {
             $targetArr = $targetArr->where('users.group_id', '=', $request->user_group);
         }
-        if (!empty($request->department)) {
-            $targetArr = $targetArr->where('users.department_id', '=', $request->department);
-        }
-        if (!empty($request->designation)) {
-            $targetArr = $targetArr->where('users.designation_id', '=', $request->designation);
-        }
         if (!empty($request->status)) {
             $targetArr = $targetArr->where('users.status', '=', $request->status);
         }
@@ -88,29 +68,20 @@ class UserController extends Controller {
         //change page number after delete if no data has current page
         if ($targetArr->isEmpty() && isset($qpArr['page']) && ($qpArr['page'] > 1)) {
             $page = ($qpArr['page'] - 1);
-            return redirect('/admin/user?page=' . $page);
+            return redirect('/user?page=' . $page);
         }
-        return view('user.index')->with(compact('qpArr', 'targetArr', 'groupList', 'departmentList', 'nameArr', 'userDepartmentOption', 'designationList', 'status'));
+        return view('user.index')->with(compact('qpArr', 'targetArr', 'groupList',
+         'nameArr', 'status'));
     }
 
     public function create(Request $request) {
         //passing param for custom function
         $qpArr = $request->all();
-        $userGroupArr = UserGroup::where('id', '<>', 9)->whereNotIn('id',[9,18,19])->orderBy('id', 'asc')->pluck('name', 'id', 'asc')->toArray();
+        $userGroupArr = UserGroup::orderBy('id', 'asc')->pluck('name', 'id', 'asc')->toArray();
 
         $groupList = array('0' => __('label.SELECT_USER_GROUP_OPT')) + $userGroupArr;
-        $departmentList = array('0' => __('label.SELECT_DEPARTMENT_OPT')) + Department::where('status', '1')->orderBy('order', 'asc')->pluck('name', 'id')->toArray();
-        $designationList = array('0' => __('label.SELECT_DESIGNATION_OPT')) + Designation::where('status', '1')->orderBy('order', 'asc')->pluck('title', 'id')->toArray();
-
-        $supervisorArr = User::join('designation', 'designation.id', '=', 'users.designation_id')
-                        ->where('users.status', '1')
-                        ->orderBy('users.group_id', 'asc')
-                        ->select(DB::raw("CONCAT(users.employee_id,'-',users.first_name,' ',users.last_name,' (',designation.short_name,')') AS name"), 'users.id')
-                        ->pluck('users.name', 'users.id')->toArray();
-        $supervisorList = array('0' => __('label.SELECT_SUPERVISOR_OPT')) + $supervisorArr;
-
         return view('user.create')->with(compact(
-                                'qpArr', 'groupList', 'departmentList', 'designationList', 'supervisorList'
+                                'qpArr', 'groupList'
         ));
     }
 
@@ -122,9 +93,6 @@ class UserController extends Controller {
 
         $rules = [
             'group_id' => 'required|not_in:0',
-            'department_id' => 'required|not_in:0',
-            'designation_id' => 'required|not_in:0',
-            'employee_id' => 'required|unique:users',
             'username' => 'required|unique:users|alpha_num',
             'password' => 'required|complex_password:,' . $request->password,
             'conf_password' => 'required|same:password'
@@ -142,32 +110,23 @@ class UserController extends Controller {
 
         if ($validator->fails()) {
 
-            return redirect('admin/user/create' . $pageNumber)
+            return redirect('user/create' . $pageNumber)
                             ->withInput($request->except('photo', 'password', 'conf_password'))
                             ->withErrors($validator);
         }
 
         //image crop image and save
         $imgName = null;
-        if (!empty($request->crop_photo)) {
-            $imgName = auth()->user()->id . uniqid() . ".png";
-            $path = public_path() . "/uploads/user/" . $imgName;
-            $croppedImg = $request->crop_photo;
-            $img = substr($croppedImg, strpos($croppedImg, ",") + 1);
-            $data = base64_decode($img);
-            $success = file_put_contents($path, $data);
+        $file = $request->file('photo');
+        if (!empty($file)) {
+            $imgName = uniqid() . "_" . Auth::user()->id . "." . $file->getClientOriginalExtension();
+            $uploadSuccess = $file->move('public/uploads/user', $imgName);
         }
 
 
         $target = new User;
         $target->group_id = $request->group_id;
-        $target->department_id = $request->department_id;
-        $target->designation_id = $request->designation_id;
-        $target->employee_id = $request->employee_id;
-        $target->first_name = $request->first_name;
-        $target->last_name = $request->last_name;
-        $target->nick_name = $request->nick_name;
-        $target->supervisor_id = $request->supervisor_id;
+        $target->name = $request->name;
         $target->email = $request->email;
         $target->phone = $request->phone;
         $target->username = $request->username;
@@ -177,10 +136,10 @@ class UserController extends Controller {
 
         if ($target->save()) {
             session()->flash('success', __('label.USER_CREATED_SUCCESSFULLY'));
-            return redirect('admin/user');
+            return redirect('user');
         } else {
             session()->flash('error', __('label.USER_COULD_NOT_BE_CREATED'));
-            return redirect('admin/user/create' . $pageNumber);
+            return redirect('user/create' . $pageNumber);
         }
     }
 
@@ -195,44 +154,16 @@ class UserController extends Controller {
         //passing param for custom function
         $qpArr = $request->all();
 
-        $userGroupArr = UserGroup::where('id', '<>', 9)->whereNotIn('id',[9,18,19])->orderBy('id', 'asc')->pluck('name', 'id', 'asc')->toArray();
+        $userGroupArr = UserGroup::orderBy('id', 'asc')->pluck('name', 'id', 'asc')->toArray();
 
         $groupList = array('0' => __('label.SELECT_USER_GROUP_OPT')) + $userGroupArr;
-        $departmentList = array('0' => __('label.SELECT_DEPARTMENT_OPT')) + Department::where('status', '1')->orderBy('order', 'asc')->pluck('name', 'id')->toArray();
-        $designationList = array('0' => __('label.SELECT_DESIGNATION_OPT')) + Designation::where('status', '1')->orderBy('order', 'asc')->pluck('title', 'id')->toArray();
-
-        $supervisorArr = User::join('designation', 'designation.id', '=', 'users.designation_id')
-                        ->where('users.status', '1')
-                        ->orderBy('users.group_id', 'asc')
-                        ->select(DB::raw("CONCAT(users.employee_id,'-',users.first_name,' ',users.last_name,' (',designation.short_name,')') AS name"), 'users.id')
-                        ->pluck('users.name', 'users.id')->toArray();
-        $supervisorList = array('0' => __('label.SELECT_SUPERVISOR_OPT')) + $supervisorArr;
-
+        
         return view('user.edit')->with(compact(
-                                'target', 'qpArr', 'groupList', 'departmentList', 'designationList', 'supervisorList'
+                                'target', 'qpArr', 'groupList'
         ));
     }
 
     public function update(Request $request, $id) {
-
-        // Ajax Request validation
-        if ($request->ajax()) {
-            $request->validate([
-                'present_address' => 'string|min:10',
-                'permanent_address' => 'string|min:10',
-                'alternative_contacts' => 'integer|min:11',
-                'nid_passport' => 'integer|min:9',
-                    ], [
-                'present_address.string' => 'Present address is too short! Minimum 10 character long!',
-                'permanent_address.string' => 'Permanent address is too short! Minimum 10 character long!',
-                'alternative_contacts.integer' => 'Contact number must be a number!',
-                'alternative_contacts.integer' => 'Contact number in too short! Minimum 11 digit long!',
-                'nid_passport.integer' => 'NID/Passport must be a number!',
-                'nid_passport.integer' => 'NID/Passport in too short! Minimum 9 digit long!',
-            ]);
-        }
-
-
 
         $target = User::find($id);
         //begin back same page after update
@@ -242,9 +173,6 @@ class UserController extends Controller {
 
         $rules = [
             'group_id' => 'required|not_in:0',
-            'department_id' => 'required|not_in:0',
-            'designation_id' => 'required|not_in:0',
-            'employee_id' => 'required|unique:users,employee_id,' . $id,
             'username' => 'required|alpha_num|unique:users,username,' . $id,
             'conf_password' => 'same:password',
         ];
@@ -265,39 +193,29 @@ class UserController extends Controller {
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
-            return redirect('admin/user/' . $id . '/edit' . $pageNumber)
+            return redirect('user/' . $id . '/edit' . $pageNumber)
                             ->withInput($request->all)
                             ->withErrors($validator);
         }
         //image resize and save
         $imgName = null;
-        if (!empty($request->crop_photo)) {
-            if (!empty($target->photo)) {
+        if (!empty($request->photo)) {
+            $prevfileName = 'public/uploads/user/' . $target->photo;
 
-                $prevfileName = 'public/uploads/user/' . $target->photo;
-
-                if (File::exists($prevfileName)) {
-                    File::delete($prevfileName);
-                }
+            if (File::exists($prevfileName)) {
+                File::delete($prevfileName);
             }
+        }
 
-            $imgName = auth()->user()->id . uniqid() . ".png";
-            $path = public_path() . "/uploads/user/" . $imgName;
-            $croppedImg = $request->crop_photo;
-            $img = substr($croppedImg, strpos($croppedImg, ",") + 1);
-            $data = base64_decode($img);
-            $success = file_put_contents($path, $data);
+        $file = $request->file('photo');
+        if (!empty($file)) {
+            $imgName = uniqid() . "_" . Auth::user()->id . "." . $file->getClientOriginalExtension();
+            $uploadSuccess = $file->move('public/uploads/user', $imgName);
         }
 
 
         $target->group_id = $request->group_id;
-        $target->department_id = $request->department_id;
-        $target->designation_id = $request->designation_id;
-        $target->employee_id = $request->employee_id;
-        $target->first_name = $request->first_name;
-        $target->last_name = $request->last_name;
-        $target->nick_name = $request->nick_name;
-        $target->supervisor_id = $request->supervisor_id;
+        $target->name = $request->name;
         $target->email = $request->email;
         $target->phone = $request->phone;
         $target->username = $request->username;
@@ -310,10 +228,10 @@ class UserController extends Controller {
         if ($target->save()) {
 
             session()->flash('success', __('label.USER_UPDATED_SUCCESSFULLY'));
-            return redirect('admin/user' . $pageNumber);
+            return redirect('user' . $pageNumber);
         } else {
             session()->flash('error', __('label.USER_COULD_NOT_BE_UPDATED'));
-            return redirect('admin/user/' . $id . '/edit' . $pageNumber);
+            return redirect('user/' . $id . '/edit' . $pageNumber);
         }
     }
 
@@ -331,17 +249,8 @@ class UserController extends Controller {
         //dependency
         //dependency check
         $dependencyArr = [
-            'ContactDesignation' => ['1' => 'created_by', '2' => 'updated_by'],
-            'User' => ['1' => 'created_by', '2' => 'updated_by', '3' => 'supervisor_id'],
-            'Department' => ['1' => 'created_by', '2' => 'updated_by'],
-            'Designation' => ['1' => 'created_by', '2' => 'updated_by'],
-            'Invoice' => ['1' => 'updated_by'],
+            'User' => ['1' => 'created_by', '2' => 'updated_by'],
             'Product' => ['1' => 'created_by', '2' => 'updated_by'],
-            'ProductCategory' => ['1' => 'created_by', '2' => 'updated_by'],
-            'SupplierToProduct' => ['1' => 'created_by'],
-            'SignatoryInfo' => ['1' => 'updated_by'],
-            'Supplier' => ['1' => 'created_by', '2' => 'updated_by'],
-            'SupplierClassification' => ['1' => 'created_by', '2' => 'updated_by'],
         ];
         foreach ($dependencyArr as $model => $val) {
             foreach ($val as $index => $key) {
@@ -349,7 +258,7 @@ class UserController extends Controller {
                 $dependentData = $namespacedModel::where($key, $id)->first();
                 if (!empty($dependentData)) {
                     session()->flash('error', __('label.COULD_NOT_DELETE_DATA_HAS_RELATION_WITH_MODEL', ['model' => $model]));
-                    return redirect('admin/user' . $pageNumber);
+                    return redirect('user' . $pageNumber);
                 }
             }
         }
@@ -365,12 +274,13 @@ class UserController extends Controller {
         } else {
             session()->flash('error', __('label.USER_COULD_NOT_BE_DELETED'));
         }
-        return redirect('admin/user' . $pageNumber);
+        return redirect('user' . $pageNumber);
     }
 
     public function filter(Request $request) {
-        $url = 'search=' . urlencode($request->search) . '&user_group=' . $request->user_group . '&department=' . $request->department . '&designation=' . $request->designation . '&status=' . $request->status;
-        return redirect('admin/user?' . $url);
+        $url = 'search=' . urlencode($request->search) . '&user_group=' . $request->user_group
+        . '&status=' . $request->status;
+        return redirect('user?' . $url);
     }
 
     public function changePassword($id = '') {

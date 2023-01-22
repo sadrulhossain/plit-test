@@ -30,7 +30,7 @@
 
 
 
-                {{-- <li class="dropdown dropdown-user">
+                <li class="dropdown dropdown-user">
 
                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
                         data-close-others="true">
@@ -49,10 +49,10 @@
                         <i class="fa fa-angle-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-default">
-                        <li>
+                        {{-- <li>
                             <a href="{{ url('admin/myProfile') }}" class="tooltips" title="My Profile">
                                 <i class="icon-user"></i>@lang('label.MY_PROFILE')</a>
-                        </li>
+                        </li> --}}
                         <li>
                             <a href="{{ url('admin/' . Auth::user()->id . '/changePassword') }}" class="tooltips"
                                 title="Change Password">
@@ -72,7 +72,7 @@
                             </form>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
                 <!-- END USER LOGIN DROPDOWN -->
                 <!-- BEGIN QUICK SIDEBAR TOGGLER -->
                 <!-- DOC: Apply "dropdown-dark" class after below "dropdown-extended" to change the dropdown styte -->
