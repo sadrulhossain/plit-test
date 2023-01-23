@@ -2118,7 +2118,7 @@ th.font-size-16, font-size-16{
 }
 
 .login{
-    background: #2B3536 url(../../../../img/arroz_login_bg.png) no-repeat center center fixed !important;
+    background: #2B3536 url(../../../../img/login_bg.jpg) no-repeat center center fixed !important;
     background-size: cover !important;
 }
 /*login form*/
@@ -2334,9 +2334,14 @@ span.maroon {
     color: #000000 !important;
 }
 .login .content {
-    background: #ffffff90 url(../../../../img/log-in-panel.png) !important;
+    background: #00000060 url(../../../../img/log-in-panel.png) !important;
     background-size: cover !important;
     border: none !important;
+    border-radius: 12px !important;
+    width: 380px !important;
+}
+.logo .img-responsive {
+    display: inline-block !important;
 }
 .text-left{
     text-align: left!important;

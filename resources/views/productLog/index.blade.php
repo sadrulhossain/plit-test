@@ -5,17 +5,15 @@
     <div class="portlet box green">
         <div class="portlet-title">
             <div class="caption">
-                <i class="fa fa-cubes"></i>@lang('label.PRODUCT_LIST')
+                <i class="fa fa-cubes"></i>@lang('label.PRODUCT_LOG')
             </div>
             <div class="actions">
-                <a class="btn btn-default btn-sm create-new" href="{{ URL::to('product/create'.Helper::queryPageStr($qpArr)) }}"> @lang('label.CREATE_NEW_PRODUCT')
-                    <i class="fa fa-plus create-new"></i>
-                </a>
+                
             </div>
         </div>
         <div class="portlet-body">
             <!-- Begin Filter-->
-            {!! Form::open(array('group' => 'form', 'url' => 'product/filter','class' => 'form-horizontal')) !!}
+            {!! Form::open(array('group' => 'form', 'url' => 'productLog/filter','class' => 'form-horizontal')) !!}
             {!! Form::hidden('page', Helper::queryPageStr($qpArr)) !!}
             <div class="row">
                 <div class="col-md-4">
@@ -51,12 +49,10 @@
                         <tr class="info">
                             <th class="text-center vcenter">@lang('label.SL_NO')</th>
                             <th class="vcenter">@lang('label.NAME')</th>
-                            <th class="vcenter">@lang('label.SLUG')</th>
                             <th class="vcenter text-center">@lang('label.IMAGE')</th>
-                            <th class="vcenter text-center">@lang('label.QUANTITY')</th>
-                            <th class="vcenter text-center">@lang('label.PRICE')</th>
-                            <th class="text-center vcenter">@lang('label.STATUS')</th>
-                            <th class="text-center vcenter">@lang('label.ACTION')</th>
+                            <th class="text-center vcenter">@lang('label.ACTION_TAKEN')</th>
+                            <th class="vcenter">@lang('label.TAKEN_BY')</th>
+                            <th class="text-center vcenter">@lang('label.TAKEN_AT')</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -70,7 +66,6 @@
                         <tr>
                             <td class="text-center vcenter">{!! ++$sl !!}</td>
                             <td class="vcenter">{!! $target->name !!} </td>
-                            <td class="vcenter">{!! $target->slug !!}</td>
                             <td class="text-center vcenter">
                                 @if (!empty($target->image_url))
                                 <img width="40" height="40" src="{{ $target->image_url }}" alt="{{ $target->name }}" />
@@ -78,30 +73,18 @@
                                 <img width="40" height="40" src="{{ URL::to('/') }}/public/img/no_image.png" alt="{{ $target->name }}" />
                                 @endif
                             </td>
-                            <td class="vcenter text-right">{!! $target->quantity ?? '0' !!}</td>
-                            <td class="vcenter text-right">{!! $target->price ?? '0.00' !!} @lang('label.TK')</td>
                             
                             <td class="text-center vcenter">
-                                @if($target->status == '1')
-                                <span class="label label-sm label-success">@lang('label.ACTIVE')</span>
-                                @else
-                                <span class="label label-sm label-warning">@lang('label.INACTIVE')</span>
+                                @if($target->action == '1')
+                                <span class="label label-sm label-success">@lang('label.CREATED')</span>
+                                @elseif($target->action == '2')
+                                <span class="label label-sm label-info">@lang('label.UPDATED')</span>
                                 @endif
                             </td>
-
-                            <td class="td-actions text-center vcenter">
-                                <div class="width-inherit">
-                                    <a class="btn btn-xs btn-primary tooltips vcenter" title="Edit" href="{{ URL::to('product/' . $target->id . '/edit'.Helper::queryPageStr($qpArr)) }}">
-                                        <i class="fa fa-edit"></i>
-                                    </a>
-                                    {!! Form::open(array('url' => 'product/' . $target->id.'/'.Helper::queryPageStr($qpArr), 'class' => 'delete-form-inline')) !!}
-                                    {!! Form::hidden('_method', 'DELETE') !!}
-                                    <button class="btn btn-xs btn-danger delete tooltips vcenter" title="Delete" type="button" data-placement="top" data-rel="tooltip" data-original-title="Delete">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                    {!! Form::close() !!}
-                                </div>
-                            </td>
+                            
+                            <td class="vcenter">{!! $target->action_taken_by !!} </td>
+                            
+                            <td class="text-center vcenter">{!! !empty($target->taken_at) ? Helper::formatDateTime($target->taken_at) : '' !!} </td>
                         </tr>
                         @endforeach
                         @else

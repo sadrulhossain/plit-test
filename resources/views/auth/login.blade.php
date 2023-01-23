@@ -4,10 +4,10 @@
 <form class="login-form" method="POST" action="{{ url('login') }}">
     @csrf
     <div class="row login-form-logo">
-        <div class="col-md-12">
+        <div class="col-md-12 text-center">
             <!-- BEGIN LOGO -->
-            <div class="logo margin-top-20">
-                <a href="#">
+            <div class="logo  margin-top-20">
+                <a href="#" class="text-center">
                     <img src="{{URL::to('/')}}/public/img/login_logo.png" class="img-responsive" alt="logo" height="120px" width="auto"/>
                 </a>
             </div>

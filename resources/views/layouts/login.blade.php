@@ -6,7 +6,7 @@
 
     <head>
         <meta charset="utf-8" />
-        <title>@lang('label.KTI_SALES_MANAGEMENT_TRACKING_SYSTEM')</title>
+        <title>@lang('label.SYSTEM_NAME')</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <meta content="Sterling Group" name="description" />

@@ -36,7 +36,7 @@ $routeName = strtolower(
                 </a>
             </li>
             <li <?php
-            $current = in_array($controllerName, ['department', 'designation', 'branch', 'usergroup', 'user']) ? 'start active open' : '';
+            $current = in_array($controllerName, ['usergroup', 'user']) ? 'start active open' : '';
             ?> class="nav-item {{ $current }}">
                 <a href="javascript:;" class="nav-link nav-toggle">
                     <i class="icon-user"></i>
@@ -52,6 +52,28 @@ $routeName = strtolower(
                     <li <?php $current = in_array($controllerName, ['user']) ? 'start active open' : ''; ?> class="nav-item {{ $current }}">
                         <a href="{{ url('/user') }}" class="nav-link ">
                             <span class="title">@lang('label.USER')</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+            <li <?php
+            $current = in_array($controllerName, ['product', 'productlog']) ? 'start active open' : '';
+            ?> class="nav-item {{ $current }}">
+                <a href="javascript:;" class="nav-link nav-toggle">
+                    <i class="icon-layers"></i>
+                    <span class="info">@lang('label.PRODUCT_SETUP')</span>
+                    <span class="arrow"></span>
+                </a>
+                <ul class="sub-menu">
+                    <li <?php $current = in_array($controllerName, ['product']) ? 'start active open' : ''; ?> class="nav-item {{ $current }}">
+                        <a href="{{ url('/product') }}" class="nav-link ">
+                            <span class="title">@lang('label.PRODUCT')</span>
+                        </a>
+                    </li>
+                    <li <?php $current = in_array($controllerName, ['productlog']) ? 'start active open' : ''; ?> class="nav-item {{ $current }}">
+                        <a href="{{ url('/productLog') }}" class="nav-link ">
+                            <span class="title">@lang('label.PRODUCT_LOG')</span>
                         </a>
                     </li>
 
