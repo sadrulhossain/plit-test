@@ -134,16 +134,13 @@
 
     $(document).ready(function () {
     // START::show pass
-       $(document).on('click', '#showPass', function () {
-           $('#passIcon').toggleClass("fa-eye fa-eye-slash");
-           var input = $('#password');
-           var confirmPass = $('#confPassword');
+       $(document).on('click', '#show-pass', function () {
+        $(this).children('i').toggleClass("fa-eye fa-eye-slash");
+           var input = $(this).parent().siblings('input');
            if (input.attr("type") == "password") {
                input.attr("type", "text");
-               confirmPass.attr("type", "text");
            } else {
                input.attr("type", "password");
-               confirmPass.attr("type", "password");
            }
        });
 //END::show pass

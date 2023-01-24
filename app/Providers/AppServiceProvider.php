@@ -3,24 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\AclUserGroupToAccess;
-use App\Subscribe; //model class
-use App\ContactInfo;
-use App\SocialNetwork;
-use App\Hotline;
-use App\CompanyInformation;
-use App\Speciality;
-use App\FooterMenu;
-use App\WhToLocalWhManager;
-use App\TmToWarehouse;
-use App\ProductTransferMaster;
-use App\Order;
-use App\Delivery;
-use App\Menu;
 use App\Product;
 use DB;
 use Route;
-use Common;
 use Auth;
 use Helper;
 

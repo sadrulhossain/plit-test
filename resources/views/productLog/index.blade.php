@@ -8,7 +8,7 @@
                 <i class="fa fa-cubes"></i>@lang('label.PRODUCT_LOG')
             </div>
             <div class="actions">
-                
+
             </div>
         </div>
         <div class="portlet-body">
@@ -20,7 +20,7 @@
                     <div class="form-group">
                         <label class="control-label col-md-4" for="search">@lang('label.NAME')</label>
                         <div class="col-md-8">
-                            {!! Form::text('search',  Request::get('search'), ['class' => 'form-control tooltips', 'title' => 'Name', 'placeholder' => 'Name','list' => 'productName','autocomplete' => 'off']) !!}
+                            {!! Form::text('search', Request::get('search'), ['class' => 'form-control tooltips', 'title' => 'Name', 'placeholder' => 'Name','list' => 'productName','autocomplete' => 'off']) !!}
                             <datalist id="productName">
                                 @if (!$nameArr->isEmpty())
                                 @foreach($nameArr as $item)
@@ -67,13 +67,13 @@
                             <td class="text-center vcenter">{!! ++$sl !!}</td>
                             <td class="vcenter">{!! $target->name !!} </td>
                             <td class="text-center vcenter">
-                                @if (!empty($target->image_url))
-                                <img width="40" height="40" src="{{ $target->image_url }}" alt="{{ $target->name }}" />
+                                @if (!empty($target->image) && File::exists('public/uploads/product/' . $target->image))
+                                <img width="40" height="40" src="{{ URL::to('/') }}/public/uploads/product/{{ $target->image }}" alt="{{ $target->full_name }}" />
                                 @else
                                 <img width="40" height="40" src="{{ URL::to('/') }}/public/img/no_image.png" alt="{{ $target->name }}" />
                                 @endif
                             </td>
-                            
+
                             <td class="text-center vcenter">
                                 @if($target->action == '1')
                                 <span class="label label-sm label-success">@lang('label.CREATED')</span>
@@ -81,9 +81,9 @@
                                 <span class="label label-sm label-info">@lang('label.UPDATED')</span>
                                 @endif
                             </td>
-                            
+
                             <td class="vcenter">{!! $target->action_taken_by !!} </td>
-                            
+
                             <td class="text-center vcenter">{!! !empty($target->taken_at) ? Helper::formatDateTime($target->taken_at) : '' !!} </td>
                         </tr>
                         @endforeach
@@ -102,11 +102,9 @@
 
 
 <script type="text/javascript">
-    $(function () {
-        
-    });
+    $(function() {
 
-    
+    });
 </script>
 
 @stop

@@ -188,6 +188,7 @@ return [
     'CREATED' => 'Created',
     'UPDATED' => 'Updated',
     'TK' => 'Tk',
+    'THE_SLUG_GENERATED_FROM_THE_NAME_HAS_ALREADY_BEEN_TAKEN' => 'The slug generated from the name has already been taken',
         
 ];
 

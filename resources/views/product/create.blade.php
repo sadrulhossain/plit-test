@@ -13,13 +13,14 @@
             {{csrf_field()}}
             <div class="form-body">
                 <div class="row">
-                    <div class="col-md-offset-2 col-md-6">
-                        
+                    <div class=" col-md-6">
+
                         <div class="form-group">
                             <label class="control-label col-md-4" for="name">@lang('label.NAME') :<span class="text-danger"> *</span></label>
                             <div class="col-md-8">
-                                {!! Form::text('name', null, ['id'=> 'name', 'class' => 'form-control']) !!} 
+                                {!! Form::text('name', null, ['id'=> 'name', 'class' => 'form-control']) !!}
                                 <span class="text-danger">{{ $errors->first('name') }}</span>
+                                <span class="text-danger">{{ $errors->first('slug') }}</span>
                             </div>
                         </div>
                         <div class="form-group">
@@ -30,21 +31,7 @@
 
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="control-label col-md-4" for="quantity">@lang('label.QUANTITY') :<span class="text-danger"> *</span></label>
-                            <div class="col-md-8">
-                                {!! Form::text('quantity', null, ['id'=> 'quantity', 'class' => 'text-right integer-only form-control']) !!} 
-                                <span class="text-danger">{{ $errors->first('quantity') }}</span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4" for="price">@lang('label.PRICE') :<span class="text-danger"> *</span></label>
-                            <div class="col-md-8">
-                                {!! Form::text('price', null, ['id'=> 'price', 'class' => 'text-right integer-decimal-only form-control']) !!} 
-                                <span class="text-danger">{{ $errors->first('price') }}</span>
-                            </div>
-                        </div>
+
 
                         <div class="form-group">
                             <label class="control-label col-md-4" for="features">@lang('label.FEATURES'):<span class="text-danger"> </span></label>
@@ -54,21 +41,48 @@
 
                             </div>
                         </div>
-                        
-
-                        <div class="form-group">
-                            <label class="control-label col-md-4" for="imageUrl">@lang('label.IMAGE_URL') :<span class="text-danger"> </span></label>
-                            <div class="col-md-8">
-                                {!! Form::text('image_url', null, ['id'=> 'imageUrl', 'class' => 'form-control']) !!} 
-                                <span class="text-danger">{{ $errors->first('image_url') }}</span>
-                            </div>
-                        </div>
-
                         <div class="form-group">
                             <label class="control-label col-md-4" for="status">@lang('label.STATUS') :</label>
                             <div class="col-md-8">
                                 {!! Form::select('status', ['1' => __('label.ACTIVE'), '2' => __('label.INACTIVE')], '1', ['class' => 'form-control js-source-states-2', 'id' => 'status']) !!}
                                 <span class="text-danger">{{ $errors->first('status') }}</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label col-md-4" for="image">@lang('label.IMAGE') :<span class="text-danger"> </span></label>
+                            <div class="col-md-8">
+                                <div class="fileinput fileinput-new" data-provides="fileinput">
+                                    <div class="fileinput-preview thumbnail" data-trigger="fileinput" style="width: 200px; height: 150px;"> </div>
+                                    <div>
+                                        <span class="btn green-seagreen btn-outline btn-file">
+                                            <span class="fileinput-new"> Select image </span>
+                                            <span class="fileinput-exists"> Change </span>
+                                            {!! Form::file('image', null, ['id'=> 'image']) !!}
+                                        </span>
+                                        <a href="javascript:;" class="btn green-seagreen fileinput-exists" data-dismiss="fileinput"> Remove </a>
+                                    </div>
+                                </div>
+                                <div class="clearfix margin-top-10">
+                                    <span class="label label-danger">@lang('label.NOTE')</span> @lang('label.USER_IMAGE_FOR_IMAGE_DESCRIPTION')
+                                </div>
+                                <span class="text-danger">{{ $errors->first('image') }}</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-4" for="quantity">@lang('label.QUANTITY') :<span class="text-danger"> *</span></label>
+                            <div class="col-md-8">
+                                {!! Form::text('quantity', null, ['id'=> 'quantity', 'class' => 'text-right integer-only form-control']) !!}
+                                <span class="text-danger">{{ $errors->first('quantity') }}</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-4" for="price">@lang('label.PRICE') :<span class="text-danger"> *</span></label>
+                            <div class="col-md-8">
+                                {!! Form::text('price', null, ['id'=> 'price', 'class' => 'text-right integer-decimal-only form-control']) !!}
+                                <span class="text-danger">{{ $errors->first('price') }}</span>
                             </div>
                         </div>
 
@@ -91,7 +105,7 @@
     </div>
 </div>
 <script type="text/javascript">
-    $(document).ready(function () {
+    $(document).ready(function() {
 
         $('#features').summernote({
             placeholder: 'Product Features',

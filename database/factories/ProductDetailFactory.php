@@ -1,0 +1,26 @@
+<?php
+
+namespace Database\Factories;
+
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+use App\ProductDetail;
+
+class ProductDetailFactory extends Factory
+{
+    protected $model = ProductDetail::class;
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'product_id' => 1,
+            'description' => Str::random(10),
+            'features' => Str::random(10),
+            'image' => uniqid() . '_1.png', 
+        ];
+    }
+}

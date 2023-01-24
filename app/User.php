@@ -5,11 +5,12 @@ namespace App;
 //use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Auth;
 
 class User extends Authenticatable {
 
-    use Notifiable;
+    use Notifiable, HasFactory;
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +18,7 @@ class User extends Authenticatable {
      * @var array
      */
     protected $fillable = [
-        'password', 'remember_token', 'conf_password',
+        'user_group_id', 'name', 'email', 'phone', 'password', 'status',
     ];
 
     /**
@@ -40,10 +41,6 @@ class User extends Authenticatable {
     }
 
     public function UserGroup() {
-        return $this->belongsTo('App\UserGroup', 'group_id');
+        return $this->belongsTo('App\UserGroup', 'user_group_id');
     }
-    public function retailer() {
-        return $this->hasone(Retailer::class, 'user_id','id');
-    }    
-
 }

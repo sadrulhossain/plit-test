@@ -32,7 +32,7 @@ class ProductLogController extends Controller
                 $join->on('product_detail.product_id', '=', 'product_log.product_id');
             })
             ->join('users', 'users.id', 'product_log.taken_by')
-            ->select('product.name', 'product_detail.image_url', 'product_log.*', 'users.name as action_taken_by');
+            ->select('product.name', 'product_detail.image', 'product_log.*', 'users.name as action_taken_by');
 
         //begin filtering
         $searchText = $request->search;

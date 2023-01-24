@@ -14,6 +14,7 @@ use Image;
 use File;
 use Response;
 use DB;
+use App\Interfaces\ProductInterface;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -29,7 +30,7 @@ class ProductController extends Controller
         $nameArr = Product::select('name')->orderBy('name', 'asc')->get();
 
         $targetArr = ProductDetail::join('product', 'product.id', '=', 'product_detail.product_id')
-            ->select('product.*', 'product_detail.image_url');
+            ->select('product.*', 'product_detail.image');
 
         //begin filtering
         $searchText = $request->search;
@@ -62,42 +63,57 @@ class ProductController extends Controller
     }
 
     //store
-    public function store(Request $request)
+    public function store(Request $request, Product $product)
     {
+        $message = [];
+        $request->merge(['slug' => Helper::generateSlug($request->name)]);
         //passing param for custom function
         $qpArr = $request->all();
         $pageNumber = $qpArr['filter'];
-        $message = [];
         $rules = [
-            'name' => 'required|unique:product',
+            'name' => 'required|unique:product,name',
+            'slug' => 'required|unique:product,slug',
             'quantity' => 'required',
             'price' => 'required',
         ];
+        if (!empty($request->photo)) {
+            $rules['image'] = 'max:1024|mimes:jpeg,png,jpg';
+        }
+        $message['slug.unique'] = __('label.THE_SLUG_GENERATED_FROM_THE_NAME_HAS_ALREADY_BEEN_TAKEN');
 
         $validator = Validator::make($request->all(), $rules, $message);
 
         if ($validator->fails()) {
+            echo '<pre>';
+            print_r($validator->errors());
+            exit;
             return redirect('product/create' . $pageNumber)
-                ->withInput($request->all)
+                ->withInput($request->except('image'))
                 ->withErrors($validator);
         }
 
-        $target = new Product;
-        $target->name = $request->name;
-        $target->slug = Helper::generateSlug($request->name);
-        $target->quantity = $request->quantity;
-        $target->price = $request->price;
-        $target->status = $request->status;
+        $product->name = $request->name;
+        $product->slug = $request->slug;
+        $product->quantity = $request->quantity;
+        $product->price = $request->price;
+        $product->status = $request->status;
 
         DB::beginTransaction();
         try {
 
-            if ($target->save()) {
+            if ($product->save()) {
+                $imgName = null;
+                $file = $request->file('image');
+                if (!empty($file)) {
+                    $imgName = uniqid() . "_" . Auth::user()->id . "." . $file->getClientOriginalExtension();
+                    $uploadSuccess = $file->move('public/uploads/product', $imgName);
+                }
+
                 $newTarget = new ProductDetail;
-                $newTarget->product_id = $target->id;
+                $newTarget->product_id = $product->id;
                 $newTarget->description = $request->description ?? '';
                 $newTarget->features = $request->features ?? '';
-                $newTarget->image_url = $request->image_url ?? '';
+                $newTarget->image = $imgName ?? '';
                 $newTarget->save();
             }
 
@@ -106,32 +122,32 @@ class ProductController extends Controller
             return redirect('product');
         } catch (\Throwable $e) {
             DB::rollback();
-
-            print_r($e->getMessage());
             session()->flash('error', __('label.PRODUCT_COULD_NOT_BE_CREATED'));
             return redirect('product/create' . $pageNumber);
         }
     }
 
-    public function edit(Request $request, $id)
+    public function edit(Request $request, Product $product)
     {
-        $target = Product::find($id);
+        $id = $product->id;
         //passing param for custom function
         $qpArr = $request->all();
 
-        $targetDetail = ProductDetail::where('product_id', $id)->select('*')->first();
+        $productDetail = ProductDetail::where('product_id', $id)->select('*')->first();
 
         return view('product.edit')->with(compact(
             'qpArr',
-            'target',
-            'targetDetail'
+            'product',
+            'productDetail'
         ));
     }
 
     //update
-    public function update(Request $request, $id)
+    public function update(Request $request, Product $product)
     {
-        $target = Product::find($id);
+        $id = $product->id;
+        $productDetail = ProductDetail::where('product_id', $id)->select('*')->first();
+        $request->merge(['slug' => Helper::generateSlug($request->name)]);
         //begin back same page after update
         $qpArr = $request->all();
         $pageNumber = $qpArr['filter'];
@@ -139,12 +155,15 @@ class ProductController extends Controller
         $message = [];
         $rules = [
             'name' => 'required|unique:product,name,' . $id,
+            'slug' => 'required|unique:product,slug,' . $id,
             'quantity' => 'required',
             'price' => 'required',
         ];
 
-        //Validation Rules for FSC Certification
-
+        if (!empty($request->photo)) {
+            $rules['image'] = 'max:1024|mimes:jpeg,png,jpg';
+        }
+        $message['slug.unique'] = __('label.THE_SLUG_GENERATED_FROM_THE_NAME_HAS_ALREADY_BEEN_TAKEN');
 
         $validator = Validator::make($request->all(), $rules, $message);
 
@@ -154,20 +173,35 @@ class ProductController extends Controller
                 ->withErrors($validator);
         }
 
-        $target->name = $request->name;
-        $target->slug = Helper::generateSlug($request->name);
-        $target->quantity = $request->quantity;
-        $target->price = $request->price;
-        $target->status = $request->status;
+        $product->name = $request->name;
+        $product->slug = Helper::generateSlug($request->name);
+        $product->quantity = $request->quantity;
+        $product->price = $request->price;
+        $product->status = $request->status;
 
-        //        print_r($target);exit;
+        //        print_r($product);exit;
         DB::beginTransaction();
         try {
-            if ($target->save()) {
-                ProductDetail::where('product_id', $target->id)->update([
+            if ($product->save()) {
+                $imgName = null;
+                if (!empty($request->image)) {
+                    $prevfileName = 'public/uploads/product/' . $productDetail->image;
+
+                    if (File::exists($prevfileName)) {
+                        File::delete($prevfileName);
+                    }
+                }
+
+                $file = $request->file('image');
+                if (!empty($file)) {
+                    $imgName = uniqid() . "_" . Auth::user()->id . "." . $file->getClientOriginalExtension();
+                    $uploadSuccess = $file->move('public/uploads/product', $imgName);
+                }
+
+                ProductDetail::where('product_id', $product->id)->update([
                     'description' => $request->description ?? '',
                     "features" => $request->features ?? '',
-                    'image_url' => $request->image_url ?? '',
+                    'image' => $imgName ?? $productDetail->image,
                 ]);
             }
 
@@ -181,22 +215,28 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, Product $product)
     {
-        $target = Product::find($id);
+        $id = $product->id;
         //begin back same page after update
         $qpArr = $request->all();
         $pageNumber = !empty($qpArr['page']) ? '?page=' . $qpArr['page'] : '?page=';
         //end back same page after update
 
-        if (empty($target)) {
+        if (empty($product)) {
             Session::flash('error', __('label.INVALID_DATA_ID'));
         }
 
 
         DB::beginTransaction();
         try {
-            if ($target->delete()) {
+            if ($product->delete()) {
+                $productDetail = ProductDetail::where('product_id', $id)->select('*')->first();
+                $prevfileName = 'public/uploads/product/' . $productDetail->image;
+
+                if (File::exists($prevfileName)) {
+                    File::delete($prevfileName);
+                }
                 ProductDetail::where('product_id', $id)->delete();
             }
             DB::commit();

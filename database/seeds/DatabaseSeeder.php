@@ -1,6 +1,11 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Database\Seeders\UserGroupSeeder;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\ProductSeeder;
+use Database\Seeders\ProductDetailSeeder;
+use Database\Seeders\ProductLogSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -11,6 +16,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UserSeeder::class);
+        $this->call([
+            UserGroupSeeder::class,
+            UserSeeder::class,
+            ProductSeeder::class,
+            ProductDetailSeeder::class,
+            ProductLogSeeder::class,
+        ]);
     }
 }

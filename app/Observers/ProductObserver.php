@@ -14,6 +14,11 @@ class ProductObserver
      * @param  \App\Models\Product  $product
      * @return void
      */
+    public function saving(Product $product)
+    {
+        $product->created_by = Auth::user()->id ?? 0;
+        $product->updated_by = Auth::user()->id ?? 0;
+    }
     public function saved(Product $product)
     {
         if ($product->wasRecentlyCreated == true) {
@@ -23,13 +28,13 @@ class ProductObserver
             // Data was updated
             $action = '2';
         }
-        
+
         ProductLog::insert([
-                'product_id' => $product->id,
-                'action' => $action,
-                'taken_by' => Auth::user()->id,
-                'taken_at' => date("Y-m-d H:i:s"),
-            ]);
+            'product_id' => $product->id,
+            'action' => $action,
+            'taken_by' => Auth::user()->id ?? 0,
+            'taken_at' => date("Y-m-d H:i:s"),
+        ]);
     }
 
     /**
@@ -51,7 +56,6 @@ class ProductObserver
      */
     public function deleted(Product $product)
     {
-        
     }
 
     /**

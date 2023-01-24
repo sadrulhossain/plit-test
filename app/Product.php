@@ -3,24 +3,20 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Auth;
 
 class Product extends Model {
+
+    use HasFactory;
 
     protected $primaryKey = 'id';
     protected $table = 'product';
     public $timestamps = true;
 
-    public static function boot() {
-        parent::boot();
-        static::creating(function($post) {
-            $post->created_by = Auth::user()->id;
-            $post->updated_by = Auth::user()->id;
-        });
+    protected $fillable = [
+        'name', 'slug', 'quantity', 'price', 'status',
+    ];
 
-        static::updating(function($post) {
-            $post->updated_by = Auth::user()->id;
-        });
-    }
-
+    
 }

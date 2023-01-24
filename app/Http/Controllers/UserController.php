@@ -37,16 +37,16 @@ class UserController extends Controller {
         $groupList = array('0' => __('label.SELECT_USER_GROUP_OPT')) + $userGroupArr;
 
         
-        $targetArr = User::join('user_group', 'user_group.id', '=', 'users.group_id')
-                ->select('user_group.name as group_name', 'users.group_id', 'users.id'
+        $targetArr = User::join('user_group', 'user_group.id', '=', 'users.user_group_id')
+                ->select('user_group.name as group_name', 'users.user_group_id', 'users.id'
                         , 'users.name', 'users.username', 'users.photo', 'users.status'
                         , 'users.email'
                         , 'users.phone')
-                ->orderBy('users.group_id', 'asc');
+                ->orderBy('users.user_group_id', 'asc');
 
         //begin filtering
         $searchText = $request->search;
-        $nameArr = User::select('username')->orderBy('group_id', 'asc')->get();
+        $nameArr = User::select('username')->orderBy('user_group_id', 'asc')->get();
         $status = array('0' => __('label.SELECT_STATUS_OPT')) + ['1' => __('label.ACTIVE'), '2' => __('label.INACTIVE')];
 
         if (!empty($searchText)) {
@@ -56,7 +56,7 @@ class UserController extends Controller {
         }
 
         if (!empty($request->user_group)) {
-            $targetArr = $targetArr->where('users.group_id', '=', $request->user_group);
+            $targetArr = $targetArr->where('users.user_group_id', '=', $request->user_group);
         }
         if (!empty($request->status)) {
             $targetArr = $targetArr->where('users.status', '=', $request->status);
@@ -92,7 +92,7 @@ class UserController extends Controller {
         $pageNumber = $qpArr['filter'];
 
         $rules = [
-            'group_id' => 'required|not_in:0',
+            'user_group_id' => 'required|not_in:0',
             'username' => 'required|unique:users|alpha_num',
             'password' => 'required|complex_password:,' . $request->password,
             'conf_password' => 'required|same:password'
@@ -125,7 +125,7 @@ class UserController extends Controller {
 
 
         $target = new User;
-        $target->group_id = $request->group_id;
+        $target->user_group_id = $request->user_group_id;
         $target->name = $request->name;
         $target->email = $request->email;
         $target->phone = $request->phone;
@@ -172,7 +172,7 @@ class UserController extends Controller {
         //end back same page after update
 
         $rules = [
-            'group_id' => 'required|not_in:0',
+            'user_group_id' => 'required|not_in:0',
             'username' => 'required|alpha_num|unique:users,username,' . $id,
             'conf_password' => 'same:password',
         ];
@@ -214,7 +214,7 @@ class UserController extends Controller {
         }
 
 
-        $target->group_id = $request->group_id;
+        $target->user_group_id = $request->user_group_id;
         $target->name = $request->name;
         $target->email = $request->email;
         $target->phone = $request->phone;
@@ -357,10 +357,10 @@ class UserController extends Controller {
 
         $id = auth()->user()->id;
 
-        $user = User::select('group_id')->where('id', $id)->first();
+        $user = User::select('user_group_id')->where('id', $id)->first();
 
         $qpArr = $request->all();
-        $userInfoData = User::join('user_group', 'user_group.id', '=', 'users.group_id')
+        $userInfoData = User::join('user_group', 'user_group.id', '=', 'users.user_group_id')
                 ->join('department', 'department.id', '=', 'users.department_id')
                 ->join('designation', 'designation.id', '=', 'users.designation_id')
                 ->select('users.id as users_id', 'users.email', 'users.photo', 'users.phone', 'users.first_name', 'users.last_name', 'users.nick_name', 'users.username', DB::raw("CONCAT(users.first_name, ' ', users.last_name) as full_name"), 'department.name as department', 'designation.title as designation', 'user_group.name as user_group')
@@ -369,11 +369,11 @@ class UserController extends Controller {
                 ->first();
 //return $userInfoData;
         $whArr = [];
-        if (auth()->user()->group_id == 12) {
+        if (auth()->user()->user_group_id == 12) {
             $whArr = WhToLocalWhManager::join('warehouse', 'warehouse.id', 'wh_to_local_wh_manager.warehouse_id')->where('wh_to_local_wh_manager.lwm_id', auth()->user()->id)->pluck('warehouse.name', 'warehouse.id')->toArray();
-        } elseif (auth()->user()->group_id == 14) {
+        } elseif (auth()->user()->user_group_id == 14) {
             $whArr = WarehouseToSr::join('warehouse', 'warehouse.id', 'warehouse_to_sr.warehouse_id')->where('warehouse_to_sr.sr_id', auth()->user()->id)->pluck('warehouse.name', 'warehouse.id')->toArray();
-        } elseif (auth()->user()->group_id == 15) {
+        } elseif (auth()->user()->user_group_id == 15) {
             $whArr = TmToWarehouse::join('warehouse', 'warehouse.id', 'tm_to_warehouse.warehouse_id')->where('tm_to_warehouse.tm_id', auth()->user()->id)->pluck('warehouse.name', 'warehouse.id')->toArray();
         }
 
@@ -385,7 +385,7 @@ class UserController extends Controller {
     public function retailerDistributorProfile(Request $request) {
         $id = auth()->user()->id;
 
-        $user = User::select('group_id')->where('id', $id)->first();
+        $user = User::select('user_group_id')->where('id', $id)->first();
 
         $qpArr = $request->all();
         $target = Retailer::join('users', 'users.id', '=', 'retailer.user_id')->where('approval_status', '1')
@@ -409,7 +409,7 @@ class UserController extends Controller {
     }
 
     public function myProfile(Request $request) {
-        if (in_array(Auth::user()->group_id, [18, 19])) {
+        if (in_array(Auth::user()->user_group_id, [18, 19])) {
             return $this->retailerDistributorProfile($request);
         } else {
             return $this->allProfile($request);
@@ -418,9 +418,9 @@ class UserController extends Controller {
 
     public function getUserAdditionalInfo(Request $request) {
 
-        $target = User::join('user_group', 'user_group.id', '=', 'users.group_id')
+        $target = User::join('user_group', 'user_group.id', '=', 'users.user_group_id')
                         ->join('department', 'department.id', '=', 'users.department_id')
-                        ->join('designation', 'designation.id', '=', 'users.designation_id')->select('user_group.name as group_name', 'users.group_id', 'users.id', 'users.first_name', 'users.last_name', 'users.photo'
+                        ->join('designation', 'designation.id', '=', 'users.designation_id')->select('user_group.name as group_name', 'users.user_group_id', 'users.id', 'users.first_name', 'users.last_name', 'users.photo'
                                 , 'users.username', 'users.photo', 'users.status', 'designation.title as designation_name', 'department.name as department_name'
                                 , 'users.employee_id', 'present_address', 'permanent_address', 'alternative_contacts', 'nid_passport')
                         ->where('users.id', $request->user_id)->first();

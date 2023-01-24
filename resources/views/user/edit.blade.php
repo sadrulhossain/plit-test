@@ -25,7 +25,7 @@
                         <div class="form-group">
                             <label class="control-label col-md-4" for="name">@lang('label.NAME') :<span class="text-danger"> *</span></label>
                             <div class="col-md-8">
-                                {!! Form::text('name', null, ['id'=> 'name', 'class' => 'form-control']) !!} 
+                                {!! Form::text('name', null, ['id'=> 'name', 'class' => 'form-control']) !!}
                                 <span class="text-danger">{{ $errors->first('name') }}</span>
                             </div>
                         </div>
@@ -41,7 +41,7 @@
                         <div class="form-group">
                             <label class="control-label col-md-4" for="phone">@lang('label.PHONE') :</label>
                             <div class="col-md-8">
-                                {!! Form::text('phone', null, ['id'=> 'phone', 'class' => 'form-control integer-only']) !!} 
+                                {!! Form::text('phone', null, ['id'=> 'phone', 'class' => 'form-control integer-only']) !!}
                                 <span class="text-danger">{{ $errors->first('user_phone') }}</span>
                             </div>
                         </div>
@@ -49,7 +49,7 @@
                         <div class="form-group">
                             <label class="control-label col-md-4" for="userName">@lang('label.USERNAME') :<span class="text-danger"> *</span></label>
                             <div class="col-md-8">
-                                {!! Form::text('username', null, ['id'=> 'userName', 'class' => 'form-control']) !!} 
+                                {!! Form::text('username', null, ['id'=> 'userName', 'class' => 'form-control']) !!}
                                 <span class="text-danger">{{ $errors->first('username') }}</span>
 
                             </div>
@@ -59,7 +59,7 @@
                             <label class="control-label col-md-4" for="password">@lang('label.PASSWORD') :<span class="text-danger"> *</span></label>
                             <div class="col-md-8">
                                 <div class="input-group bootstrap-touchspin">
-                                    {!! Form::password('password', ['id'=> 'password', 'class' => 'form-control','autocomplete' => 'off']) !!} 
+                                    {!! Form::password('password', ['id'=> 'password', 'class' => 'form-control','autocomplete' => 'off']) !!}
                                     <span class="input-group-btn">
                                         <button class="btn default show-pass" type="button" id="showPass">
                                             <i class="fa fa-eye" id="passIcon"></i>
@@ -108,7 +108,7 @@
                         <div class="fileinput fileinput-new" data-provides="fileinput">
                             <div class="fileinput-preview thumbnail" data-trigger="fileinput" style="width: 200px; height: 150px;">
                                 @if(!empty($target->photo))
-                                <img src="{{URL::to('/')}}/public/uploads/user/{{$target->photo}}" alt="{{ $target->full_name}}"/>
+                                <img src="{{URL::to('/')}}/public/uploads/user/{{$target->photo}}" alt="{{ $target->full_name}}" />
                                 @endif
                             </div>
                             <div>
@@ -141,26 +141,23 @@
                 </div>
             </div>
             {!! Form::close() !!}
-        </div>	
+        </div>
     </div>
 </div>
 <script type="text/javascript">
-    $(document).ready(function () {
+    $(document).ready(function() {
 
-//        START::show pass
-       $(document).on('click', '#showPass', function () {
-           $('#passIcon').toggleClass("fa-eye fa-eye-slash");
-           var input = $('#password');
-           var confirmPass = $('#confPassword');
-           if (input.attr("type") == "password") {
-               input.attr("type", "text");
-               confirmPass.attr("type", "text");
-           } else {
-               input.attr("type", "password");
-               confirmPass.attr("type", "password");
-           }
-       });
-//        END::show pass
+        //        START::show pass
+        $(document).on('click', '#show-pass', function() {
+            $(this).children('i').toggleClass("fa-eye fa-eye-slash");
+            var input = $(this).parent().siblings('input');
+            if (input.attr("type") == "password") {
+                input.attr("type", "text");
+            } else {
+                input.attr("type", "password");
+            }
+        });
+        //        END::show pass
 
 
 

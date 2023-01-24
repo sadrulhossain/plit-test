@@ -22,7 +22,7 @@
                     <div class="form-group">
                         <label class="control-label col-md-4" for="search">@lang('label.NAME')</label>
                         <div class="col-md-8">
-                            {!! Form::text('search',  Request::get('search'), ['class' => 'form-control tooltips', 'title' => 'Name', 'placeholder' => 'Name','list' => 'productName','autocomplete' => 'off']) !!}
+                            {!! Form::text('search', Request::get('search'), ['class' => 'form-control tooltips', 'title' => 'Name', 'placeholder' => 'Name','list' => 'productName','autocomplete' => 'off']) !!}
                             <datalist id="productName">
                                 @if (!$nameArr->isEmpty())
                                 @foreach($nameArr as $item)
@@ -66,23 +66,23 @@
                         $page = empty($page) ? 1 : $page;
                         $sl = ($page - 1) * Session::get('paginatorCount');
                         ?>
-                        @foreach($targetArr as $target)
+                        @foreach($targetArr as $product)
                         <tr>
                             <td class="text-center vcenter">{!! ++$sl !!}</td>
-                            <td class="vcenter">{!! $target->name !!} </td>
-                            <td class="vcenter">{!! $target->slug !!}</td>
+                            <td class="vcenter">{!! $product->name !!} </td>
+                            <td class="vcenter">{!! $product->slug !!}</td>
                             <td class="text-center vcenter">
-                                @if (!empty($target->image_url))
-                                <img width="40" height="40" src="{{ $target->image_url }}" alt="{{ $target->name }}" />
+                                @if (!empty($product->image) && File::exists('public/uploads/product/' . $product->image))
+                                <img width="40" height="40" src="{{ URL::to('/') }}/public/uploads/product/{{ $product->image }}" alt="{{ $product->full_name }}" />
                                 @else
-                                <img width="40" height="40" src="{{ URL::to('/') }}/public/img/no_image.png" alt="{{ $target->name }}" />
+                                <img width="40" height="40" src="{{ URL::to('/') }}/public/img/no_image.png" alt="{{ $product->name }}" />
                                 @endif
                             </td>
-                            <td class="vcenter text-right">{!! $target->quantity ?? '0' !!}</td>
-                            <td class="vcenter text-right">{!! $target->price ?? '0.00' !!} @lang('label.TK')</td>
-                            
+                            <td class="vcenter text-right">{!! $product->quantity ?? '0' !!}</td>
+                            <td class="vcenter text-right">{!! $product->price ?? '0.00' !!} @lang('label.TK')</td>
+
                             <td class="text-center vcenter">
-                                @if($target->status == '1')
+                                @if($product->status == '1')
                                 <span class="label label-sm label-success">@lang('label.ACTIVE')</span>
                                 @else
                                 <span class="label label-sm label-warning">@lang('label.INACTIVE')</span>
@@ -91,10 +91,10 @@
 
                             <td class="td-actions text-center vcenter">
                                 <div class="width-inherit">
-                                    <a class="btn btn-xs btn-primary tooltips vcenter" title="Edit" href="{{ URL::to('product/' . $target->id . '/edit'.Helper::queryPageStr($qpArr)) }}">
+                                    <a class="btn btn-xs btn-primary tooltips vcenter" title="Edit" href="{{ URL::to('product/' . $product->id . '/edit'.Helper::queryPageStr($qpArr)) }}">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                    {!! Form::open(array('url' => 'product/' . $target->id.'/'.Helper::queryPageStr($qpArr), 'class' => 'delete-form-inline')) !!}
+                                    {!! Form::open(array('url' => 'product/' . $product->id.'/'.Helper::queryPageStr($qpArr), 'class' => 'delete-form-inline')) !!}
                                     {!! Form::hidden('_method', 'DELETE') !!}
                                     <button class="btn btn-xs btn-danger delete tooltips vcenter" title="Delete" type="button" data-placement="top" data-rel="tooltip" data-original-title="Delete">
                                         <i class="fa fa-trash"></i>
@@ -119,11 +119,9 @@
 
 
 <script type="text/javascript">
-    $(function () {
-        
-    });
+    $(function() {
 
-    
+    });
 </script>
 
 @stop
