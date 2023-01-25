@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use App\UserGroup;
+use Faker\Factory as Faker;
 
 class UserGroupFactory extends Factory
 {
@@ -16,8 +17,9 @@ class UserGroupFactory extends Factory
      */
     public function definition()
     {
+        $faker = Faker::create();
         return [
-            'name' => Str::random(10),
+            'name' => $faker->unique()->name(),
         ];
     }
 }

@@ -17,7 +17,7 @@ class ProductLogFactory extends Factory
     public function definition()
     {
         return [
-            'product_id' => 1, 
+            'product_id' => 1,
             'action' => '1',
             'taken_at' => date('Y-m-d H:i:s'),
             'taken_by' => 1,

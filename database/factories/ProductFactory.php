@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use App\Product;
+use Faker\Factory as Faker;
 use Helper;
 
 class ProductFactory extends Factory
@@ -17,12 +18,13 @@ class ProductFactory extends Factory
      */
     public function definition()
     {
-        $name = Str::random(10);
+        $faker = Faker::create();
+        $name = $faker->unique()->name();
         return [
             'name' => $name,
             'slug' => Helper::generateSlug($name),
             'quantity' => rand(1, 300),
-            'price' => rand(10, 1000), 
+            'price' => rand(10, 1000),
             'status' => '1',
             'created_by' => 1,
             'updated_by' => 1,

@@ -5,6 +5,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use App\ProductDetail;
+use Faker\Factory as Faker;
 
 class ProductDetailFactory extends Factory
 {
@@ -16,11 +17,12 @@ class ProductDetailFactory extends Factory
      */
     public function definition()
     {
+        $faker = Faker::create();
         return [
             'product_id' => 1,
-            'description' => Str::random(10),
-            'features' => Str::random(10),
-            'image' => uniqid() . '_1.png', 
+            'description' => $faker->text(),
+            'features' => $faker->text(),
+            'image' => uniqid() . '_1.png',
         ];
     }
 }
